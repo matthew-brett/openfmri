@@ -3,8 +3,10 @@
 import os
 from os.path import join as pjoin, abspath
 import re
+import csv
+from collections import namedtuple
 
-import numpy as np
+from .utils import open4csv
 
 RE_SUB_NO = re.compile(r"sub(\d+)$")
 RE_TASK_RUN_NO = re.compile(r"task(\d+)_run(\d+)$")
@@ -54,13 +56,38 @@ def get_model_nos(models_path):
     return tuple(models)
 
 
+EventDef = namedtuple('EventDef', ['onset', 'duration', 'amplitude'])
+
+
+def read_cond_file(path):
+    """ Return list of EventDef tuples from `path`
+
+    Parameters
+    ----------
+    path : str
+        Filename of condition file
+
+    Returns
+    -------
+    ons_dur_amp : list
+        List of EventDef tuples.  EventDef tuples ontain onset, duration,
+        amplitude floats.
+    """
+    with open4csv(path, 'r') as csvfile:
+        dialect = csv.Sniffer().sniff(csvfile.read())
+        csvfile.seek(0)
+        reader = csv.reader(csvfile, dialect)
+        rows = list(reader)
+    return [EventDef(*(float(v) for v in row)) for row in rows]
+
+
 def get_conditions(model_run_path):
     conditions = []
     for fname in os.listdir(model_run_path):
         cond_match = RE_COND_NO.match(fname)
         if cond_match is None:
             continue
-        ons_dur_amp = np.loadtxt(pjoin(model_run_path, fname))
+        ons_dur_amp = read_cond_file(pjoin(model_run_path, fname))
         conditions.append((int(cond_match.groups()[0]), ons_dur_amp))
     return conditions
 
@@ -80,7 +107,6 @@ class Run(object):
 
     def get_bold_fname(self, prefix=''):
         return pjoin(self.path, prefix + 'bold.nii.gz')
-
 
 
 class RunModel(object):

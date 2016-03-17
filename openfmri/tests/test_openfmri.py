@@ -4,13 +4,9 @@
 from os.path import dirname, join as pjoin, isdir, isfile
 from itertools import product
 
-import numpy as np
-
 from ..openfmri import (path_to_subj, path_to_task_run, get_subjects,
-                        get_tasks_runs, get_model_nos, get_conditions)
-
-from numpy.testing import (assert_almost_equal,
-                           assert_array_equal)
+                        get_tasks_runs, get_model_nos, get_conditions,
+                        read_cond_file)
 
 from nose.tools import (assert_true, assert_false, assert_raises,
                         assert_equal, assert_not_equal)
@@ -18,6 +14,8 @@ from nose.tools import (assert_true, assert_false, assert_raises,
 
 DS114 = pjoin(dirname(__file__), 'ds114')
 SUB1 = pjoin(DS114, 'sub001')
+DS105 = pjoin(dirname(__file__), 'ds105')
+SUB5 = pjoin(DS105, 'sub005')
 
 
 def test_path_to_subj():
@@ -50,6 +48,24 @@ def test_get_tasks_runs():
 
 def test_get_model_nos():
     assert_equal(get_model_nos(pjoin(SUB1, 'model')), (1, 2))
+
+
+def test_read_cond_file():
+    cond_file = pjoin(SUB5, 'model', 'model001', 'onsets', 'task001_run001',
+                      'cond001.txt')
+    assert_equal(read_cond_file(cond_file),
+                 [(228.0, 0.5, 1.0),
+                  (230.0, 0.5, 1.0),
+                  (232.0, 0.5, 1.0),
+                  (234.0, 0.5, 1.0),
+                  (236.0, 0.5, 1.0),
+                  (238.0, 0.5, 1.0),
+                  (240.0, 0.5, 1.0),
+                  (242.0, 0.5, 1.0),
+                  (244.0, 0.5, 1.0),
+                  (246.0, 0.5, 1.0),
+                  (248.0, 0.5, 1.0),
+                  (250.0, 0.5, 1.0)])
 
 
 def test_runs():

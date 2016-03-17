@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 ''' Installation script for openfmri package '''
 import sys
+import os
+from os.path import join as pjoin, relpath, sep as psep
+import fnmatch
 
 # For some commands, use setuptools.
 if len(set(('develop', 'bdist_egg', 'bdist_rpm', 'bdist', 'bdist_dumb',
@@ -15,6 +18,18 @@ import versioneer
 
 CMDCLASS = versioneer.get_cmdclass()
 
+
+def find_files(root, subdir, globber='*'):
+    paths = []
+    path = pjoin(root, subdir)
+    for dirpath, dirnames, filenames in os.walk(path):
+        for filename in fnmatch.filter(filenames, globber):
+            paths.append(relpath(pjoin(dirpath, filename), root))
+    if psep != '/':
+        paths = [p.replace(psep, '/') for p in paths]
+    return paths
+
+
 setup(name='openfmri',
       version=versioneer.get_version(),
       cmdclass=CMDCLASS,
@@ -26,10 +41,9 @@ setup(name='openfmri',
       url='http://github.com/matthew-brett/openfmri',
       packages=['openfmri',
                 'openfmri.tests'],
-      package_data = {'openfmri': [
-          'tests/ds105',
-          'tests/ds114',
-      ]},
+      package_data = {'openfmri.tests':
+                      find_files(pjoin('openfmri', 'tests'), 'ds105') +
+                      find_files(pjoin('openfmri', 'tests'), 'ds114')},
       license='BSD license',
       classifiers = [
           'Development Status :: 2 - Pre-Alpha',
