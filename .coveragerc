@@ -1,0 +1,6 @@
+[run]
+branch = True
+source = openfmri
+include = */openfmri/*
+omit =
+    */_version.py
