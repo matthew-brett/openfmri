@@ -1,1 +1,0 @@
-# Init for consden module
