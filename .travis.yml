@@ -1,0 +1,61 @@
+# vim ft=yaml
+# Multiple lines can be made a single "virtual line" because of the way that
+# Travis munges each line before executing it to print out the exit status.
+# It's okay for it to be on multiple physical lines, so long as you remember:
+# - There can't be any leading "-"s - All newlines will be removed, so use
+# ";"s
+sudo: false  # To use travis container infrastructure
+
+language: python
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+
+env:
+    global:
+        - DEPENDS=""
+
+python:
+    - 2.6
+    - 3.3
+    - 3.4
+    - 3.5
+
+matrix:
+  include:
+    - python: 2.7
+      env:
+        - COVERAGE=1
+    # Setup.py install
+    - python: 2.7
+      env:
+        - INTSTALL_TYPE=setup
+    - python: 2.7
+      env:
+        - INSTALL_TYPE=sdist
+    - python: 2.7
+      env:
+        - INSTALL_TYPE=wheel
+
+before_install:
+    - source travis-tools/utils.sh
+    - travis_before_install
+
+# command to install dependencies
+# e.g. pip install -r requirements.txt # --use-mirrors
+install:
+    - travis_install $INSTALL_TYPE
+# command to run tests, e.g. python setup.py test
+script:
+    # Change into an innocuous directory and find tests from installation
+    - pip install nose
+    - mkdir for_testing
+    - cd for_testing
+    - if [ "${COVERAGE}" == "1" ]; then
+      cp ../.coveragerc .;
+      COVER_ARGS="--with-coverage --cover-package openfmri";
+      fi
+    - nosetests --verbosity=3 $COVER_ARGS openfmri
+after_success:
+    - if [ "${COVERAGE}" == "1" ]; then coveralls; fi
