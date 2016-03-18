@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The openfmri data model &mdash; openfmri 0+untagged.10.g9ee232e documentation</title>
+    <title>The openfmri data model &mdash; openfmri 0+untagged.11.g89083c7 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0+untagged.10.g9ee232e',
+        VERSION:     '0+untagged.11.g89083c7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="openfmri 0+untagged.10.g9ee232e documentation" href="index.html" />
+    <link rel="top" title="openfmri 0+untagged.11.g89083c7 documentation" href="index.html" />
     <link rel="prev" title="The openfmri package" href="index.html" />
    
   
@@ -40,6 +40,14 @@
             
   <div class="section" id="the-openfmri-data-model">
 <h1>The openfmri data model<a class="headerlink" href="#the-openfmri-data-model" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>A <em>dataset</em> contains <em>subjects</em>.  Each subject has had functional images
+collected while they are performing one or more <em>tasks</em>.  They may have had
+one or more functional <em>runs</em> (see <a class="reference internal" href="#runs"><span>A functional run</span></a>) while performing each task.
+For each subject there is one or more <em>model</em> of the way that the tasks have
+influenced the neural activity of the subject.</p>
+</div>
 <div class="section" id="objects">
 <h2>Objects<a class="headerlink" href="#objects" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -50,29 +58,189 @@
 <li>Task;</li>
 </ul>
 </div>
-<div class="section" id="details">
-<h2>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="numbering">
+<h2>Numbering<a class="headerlink" href="#numbering" title="Permalink to this headline">¶</a></h2>
+<p>In what follows, a number written as <code class="docutils literal"><span class="pre">XXX</span></code> is an integer written as a string
+with 3 digits and left zero padding, e.g. <code class="docutils literal"><span class="pre">003,</span> <span class="pre">052,</span> <span class="pre">105</span></code>.  The integers
+identify element in a sequence, such as a sequence of datasets or subjects or
+scans.  The first element in the sequence is always 1.  We will call these
+<em>ZPINTs</em>.</p>
+</div>
+<div class="section" id="image-format">
+<h2>Image format<a class="headerlink" href="#image-format" title="Permalink to this headline">¶</a></h2>
+<p>All anatomical and functional scans are in compressed single file <a class="reference external" href="http://nifti.nimh.nih.gov">NIfTI</a> image
+format.  They therefore all have file extensions <code class="docutils literal"><span class="pre">.nii.gz</span></code>.  You can read
+these using the <a class="reference external" href="http://nipy.org/nibabel">nibabel</a> Python package.  If you need the uncompressed image
+for any reason, the usual <code class="docutils literal"><span class="pre">gunzip</span></code> Unix command line utility will give you a
+valid <code class="docutils literal"><span class="pre">.nii</span></code> file from the <code class="docutils literal"><span class="pre">.nii.gz</span></code> file.</p>
+</div>
+<div class="section" id="a-functional-run">
+<span id="runs"></span><h2>A functional run<a class="headerlink" href="#a-functional-run" title="Permalink to this headline">¶</a></h2>
+<p>A run is a continuous sequence of functional brain volumes.  The scan begins
+acquiring data at the beginning of a functional run, and stops at the end.
+In the OpenFMRI directories, runs are always stored as four dimensional NIfTI
+images, where the first three dimensions of the image are spatial (e.g. left
+to right, anterior to posterior, inferior to superior), and the last dimension
+is time.  For example, here we load an OpenFMRI image containing a single run:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nibabel</span> <span class="kn">as</span> <span class="nn">nib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">img</span> <span class="o">=</span> <span class="n">nib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;ds114/sub005/BOLD/task001_run001/bold.nii.gz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">img</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(64, 64, 30, 76)</span>
+</pre></div>
+</div>
+<p>This is sequence of 76 brain volumes, each of shape (64, 64, 30).  Slicing
+over the last axis gives the brain volume corresponding to a particular time:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vol0</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">get_data</span><span class="p">()[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="a-task">
+<h2>A task<a class="headerlink" href="#a-task" title="Permalink to this headline">¶</a></h2>
+<p>A <em>task</em> in OpenFMRI is an identifier for a set of stimuli shown to the
+subject or responses made by the subject, or combinations of stimulus and
+response, that the experimenter believed would change the functional brain
+activity.</p>
+<p>A task may be modeled in different ways and therefore with different <em>models</em>.</p>
+<p>When OpenFMRI defines a model for a task, it categorizes the stimuli and
+responses for a task into <em>conditions</em>.</p>
+<p>Thus, a model is comprised of a set of conditions for each task.</p>
+<p>This might be clearer later on in the section <a class="reference internal" href="#models"><span>Models directory</span></a>.</p>
+</div>
+<div class="section" id="dataset">
+<h2>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline">¶</a></h2>
 <p>A Dataset has a corresponding dataset directory.</p>
-<p>A dataset directory has a name <code class="docutils literal"><span class="pre">dsXXX</span></code> where <code class="docutils literal"><span class="pre">XXX</span></code> is an integer with left
-zero padding, e.g. <code class="docutils literal"><span class="pre">ds003</span></code> for dataset number 3.</p>
+<p>A dataset directory has directory name <code class="docutils literal"><span class="pre">dsXXX</span></code> (where <code class="docutils literal"><span class="pre">XXX</span></code> is a ZPINT),
+e.g. <code class="docutils literal"><span class="pre">ds003</span></code> for dataset number 3.</p>
 <p>A Dataset may contain</p>
 <ul class="simple">
-<li>subject directories;</li>
+<li>subject directories (see <a class="reference internal" href="#subject"><span>Subject</span></a>);</li>
 <li><code class="docutils literal"><span class="pre">scan_key.txt</span></code>: information about the scans in the dataset, such as the TR;</li>
 <li><code class="docutils literal"><span class="pre">study_key.txt</span></code>: information about the experimental protocol, such as the
 experiment name;</li>
 <li><code class="docutils literal"><span class="pre">task_key.txt</span></code>: file associating task numbers (see below) with task names.</li>
-<li><code class="docutils literal"><span class="pre">model_key.txt</span></code>: file associating model mumbers (see below) with model
+<li><code class="docutils literal"><span class="pre">model_key.txt</span></code>: file associating model numbers (see below) with model
 names.</li>
 </ul>
+</div>
+<div class="section" id="subject">
+<span id="id1"></span><h2>Subject<a class="headerlink" href="#subject" title="Permalink to this headline">¶</a></h2>
 <p>The subject directory contains all information for one subject.</p>
-<p>The subject directory has name of form <code class="docutils literal"><span class="pre">subXXX</span></code> where <code class="docutils literal"><span class="pre">XXX</span></code> is an integer
-with left zero padding, e.g <code class="docutils literal"><span class="pre">sub001</span></code> for subject number 1.  Indices start at
-1 so <cite>sub001</cite> is the first subject in the dataset.</p>
+<p>The subject directory has name of form <code class="docutils literal"><span class="pre">subXXX</span></code> where <code class="docutils literal"><span class="pre">XXX</span></code> is a ZPINT
+— e.g. <code class="docutils literal"><span class="pre">sub001</span></code> for the first subject.</p>
 <p>A subject directory may contain:</p>
 <ul class="simple">
-<li>an <code class="docutils literal"><span class="pre">anatomy</span></code> directory.</li>
+<li>an <code class="docutils literal"><span class="pre">anatomy</span></code> directory, containing anatomical images;</li>
+<li>a <code class="docutils literal"><span class="pre">BOLD</span></code> directory containing a directory tree of functional images;</li>
+<li>a <code class="docutils literal"><span class="pre">model</span></code> directory containing a directory tree of model definitions.</li>
 </ul>
+</div>
+<div class="section" id="anatomy-directory">
+<h2>Anatomy directory<a class="headerlink" href="#anatomy-directory" title="Permalink to this headline">¶</a></h2>
+<p>The anatomy directory contains images corresponding to one or more anatomical
+scans for the containing subject.  The scans have names <code class="docutils literal"><span class="pre">highresXXX</span></code> where
+<code class="docutils literal"><span class="pre">XXX</span></code> is a ZPINT.</p>
+<p>The original scan in NIfTI format has filename <code class="docutils literal"><span class="pre">highresXXX.nii.gz</span></code>, e.g.
+<code class="docutils literal"><span class="pre">highres001.nii.gz</span></code>.</p>
+<p>For each original scan, there may be:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">highresXXX_brain_mask.nii.gz</span></code>: an image with the same dimensions as
+<code class="docutils literal"><span class="pre">highresXXX.nii.gz</span></code> but containing values between 0 and 1 expressing
+whether the corresponding location is inside (1) or outside (0) the brain;</li>
+<li><code class="docutils literal"><span class="pre">highresXXX_brain.nii.gz</span></code>: a copy of <code class="docutils literal"><span class="pre">highresXXX.nii.gz</span></code> where values
+outside the brain (mask values of 0) have been set to 0.</li>
+</ul>
+<p>For example, here is the list of files in <code class="docutils literal"><span class="pre">ds114/sub002/anatomy</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">highres001</span><span class="o">.</span><span class="n">nii</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">highres001_brain</span><span class="o">.</span><span class="n">nii</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">highres001_brain_mask</span><span class="o">.</span><span class="n">nii</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">highres002</span><span class="o">.</span><span class="n">nii</span><span class="o">.</span><span class="n">gz</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="bold-directory">
+<h2>BOLD directory<a class="headerlink" href="#bold-directory" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">BOLD</span></code> directory contains one subdirectory per functional run.</p>
+<p>The subdirectories are named after the <em>tasks</em> for this experiment.  There may
+be more than one run for which the subject performs the task.  For example,
+here is a directory listing for <code class="docutils literal"><span class="pre">ds114/sub002/BOLD</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>task001_run001/
+task001_run002/
+task002_run001/
+task002_run002/
+task003_run001/
+task003_run002/
+task004_run001/
+task004_run002/
+task005_run001/
+task005_run002/
+</pre></div>
+</div>
+<p>So <code class="docutils literal"><span class="pre">task003_run002</span></code> contains the second functional scan during which the
+subject performed task 3.</p>
+<p>Within each of these directories named for the (task number, repeat number),
+there is a NIfTI image with the functional data, called <code class="docutils literal"><span class="pre">bold.nii.gz</span></code>.</p>
+<p>There may also be a subdirectory called <code class="docutils literal"><span class="pre">QA</span></code> containing various metrics from
+processing the <code class="docutils literal"><span class="pre">bold.nii.gz</span></code>.</p>
+</div>
+<div class="section" id="models-directory">
+<span id="models"></span><h2>Models directory<a class="headerlink" href="#models-directory" title="Permalink to this headline">¶</a></h2>
+<p>The models directory of a subject contains one subdirectory per model.</p>
+<p>Each model is a different way of defining how the task performed by the
+subject can by broken up into <em>conditions</em>.</p>
+<p>There may be one or more model per subject.</p>
+<p>For example, the directory <code class="docutils literal"><span class="pre">ds114/sub002/models</span></code> contains the following
+subdirectories:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>model001/
+model002/
+</pre></div>
+</div>
+<p>The subdirectory for each model contains a further subdirectory called
+<code class="docutils literal"><span class="pre">onsets</span></code>.  This subdirectory in turn contains one subdirectory per (task
+number, repeat number) pair.  Here is the listing of
+<code class="docutils literal"><span class="pre">ds114/sub002/model/model002/onsets</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>task001_run001/
+task001_run002/
+task002_run001/
+task002_run002/
+task003_run001/
+task003_run002/
+task004_run001/
+task004_run002/
+task005_run001/
+task005_run002/
+</pre></div>
+</div>
+<p>Within each of these (task number, repeat number) directories, there is one
+file per <em>condition</em>.  Here is the contents of
+<code class="docutils literal"><span class="pre">ds114/sub002/model/model002/onsets/task003_run001</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">cond001</span><span class="o">.</span><span class="n">txt</span>
+<span class="n">cond002</span><span class="o">.</span><span class="n">txt</span>
+<span class="n">cond003</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>The condition files are text files with one row per <em>event</em>.  An event is an
+individual stimulus or response.  For each event, the condition file gives the
+onset time of the event, in seconds from time the scanner began collecting
+data for the first volume in the functional run. The file also gives the
+duration of the event, in seconds, and the amplitude of the event.  For
+example, here is the contents of
+<code class="docutils literal"><span class="pre">ds114/sub002/model/model002/onsets/task003_run001/cond001.txt</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>10      15.000000       1
+100     15.000000       1
+190     15.000000       1
+280     15.000000       1
+370     15.000000       1
+</pre></div>
+</div>
+<p>This condition file says that there were five events, starting at 10, 100,
+190, 280 and 370 seconds after the start of scanning.  Each of these events
+lasted 15 seconds.  They were all of equal amplitude (here, 1 in arbitrary
+units).</p>
+<p>Events can also differ in amplitude.  For example, imagine the event was a
+flash of light.  There might be flashes with low intensity, flashes of medium
+intensity and flashes of high intensity.  In that case the condition file
+might have amplitude values of 1 for the low-intensity flashes, 2 for the
+medium intensity flashes, and 3 for high-intensity flashes.</p>
 </div>
 </div>
 
@@ -85,8 +253,17 @@ with left zero padding, e.g <code class="docutils literal"><span class="pre">sub
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">The openfmri data model</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
 <li><a class="reference internal" href="#objects">Objects</a></li>
-<li><a class="reference internal" href="#details">Details</a></li>
+<li><a class="reference internal" href="#numbering">Numbering</a></li>
+<li><a class="reference internal" href="#image-format">Image format</a></li>
+<li><a class="reference internal" href="#a-functional-run">A functional run</a></li>
+<li><a class="reference internal" href="#a-task">A task</a></li>
+<li><a class="reference internal" href="#dataset">Dataset</a></li>
+<li><a class="reference internal" href="#subject">Subject</a></li>
+<li><a class="reference internal" href="#anatomy-directory">Anatomy directory</a></li>
+<li><a class="reference internal" href="#bold-directory">BOLD directory</a></li>
+<li><a class="reference internal" href="#models-directory">Models directory</a></li>
 </ul>
 </li>
 </ul>
