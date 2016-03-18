@@ -51,22 +51,22 @@ install:
     - travis_install $INSTALL_TYPE
 # command to run tests, e.g. python setup.py test
 script:
-    -|
-     if [ -n "$BUILD_DOC" ]; then
-         cd doc
-         pip install -r ../doc-requirements.txt
-         make html
-         make doctest
-     else
-         # Change into an innocuous directory and find tests from installation
-         pip install nose
-         mkdir for_testing
-         cd for_testing
-         if [ "${COVERAGE}" == "1" ]; then
-             cp ../.coveragerc .;
-             COVER_ARGS="--with-coverage --cover-package openfmri";
-         fi
-         nosetests --verbosity=3 $COVER_ARGS openfmri
-     fi
+     - |
+       if [ -n "$BUILD_DOC" ]; then
+           cd doc
+           pip install -r ../doc-requirements.txt
+           make html
+           make doctest
+       else
+           # Change into an innocuous directory and find tests from installation
+           pip install nose
+           mkdir for_testing
+           cd for_testing
+           if [ "${COVERAGE}" == "1" ]; then
+               cp ../.coveragerc .
+               COVER_ARGS="--with-coverage --cover-package openfmri"
+           fi
+           nosetests --verbosity=3 $COVER_ARGS openfmri
+       fi
 after_success:
     - if [ "${COVERAGE}" == "1" ]; then coveralls; fi
