@@ -1,0 +1,3 @@
+# Requirements for doc build
+sphinx
+ghp-import
