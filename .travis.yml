@@ -38,7 +38,7 @@ matrix:
       env:
         - INSTALL_TYPE=wheel
     - python: 2.7
-    - env:
+      env:
         - BUILD_DOC=1
 
 before_install:
