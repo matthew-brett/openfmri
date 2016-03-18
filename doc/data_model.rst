@@ -183,7 +183,7 @@ Models directory
 
 The models directory of a subject contains one subdirectory per model.
 
-Each model is a different way of defining how the task performed by the
+Each model is a different way of defining how the tasks performed by the
 subject can by broken up into *conditions*.
 
 There may be one or more model per subject.
